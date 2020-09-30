@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 
 import './Chat.css';
 
@@ -11,8 +11,21 @@ import {
   SearchOutlined,
 } from '@material-ui/icons';
 import ChatMessage from '../components/ChatMessage';
+import axios from '../common/axios';
 
-const Chat = () => {
+const Chat = ({ messages }) => {
+  const [input, setInput] = useState('');
+  const sendMessageHandler = (e) => {
+    e.preventDefault();
+    axios.post('/api/v1/messages/new', {
+      message: input,
+      name: 'Breiter',
+      timestamp: new Date().toUTCString(),
+      received: true,
+    });
+
+    setInput('');
+  };
   return (
     <div className='chat'>
       <div className='chat__header'>
@@ -36,17 +49,29 @@ const Chat = () => {
       </div>
 
       <div className='chat__body'>
-        <ChatMessage />
-        <ChatMessage receiver />
-        <ChatMessage receiver />
-        <ChatMessage receiver />
+        {messages.map((message) => (
+          <ChatMessage
+            key={Math.random()}
+            name={message.name}
+            message={message.message}
+            receiver={message.received}
+            timestamp={message.timestamp}
+          />
+        ))}
       </div>
 
       <div className='chat__footer'>
         <InsertEmoticon />
         <form>
-          <input placeholder='Type a message' type='text' />
-          <button type='submit'>Send a message</button>
+          <input
+            value={input}
+            placeholder='Type a message'
+            type='text'
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <button onClick={sendMessageHandler} type='submit'>
+            Send a message
+          </button>
         </form>
         <Mic />
       </div>
